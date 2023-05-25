@@ -1,0 +1,226 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #212529;
+    /* background-color: #393646; */
+    transition: 0.5s;
+}
+
+body.active {
+    background-color: #395b64;
+}
+
+.container {
+    position: relative;
+    width: 800px;
+    height: 500px;
+    margin: 20px;
+    /* background-color: #ff0; */
+}
+
+.dark-bg {
+    position: absolute;
+    top: 40px;
+    width: 100%;
+    height: 420px;
+    display: flex;
+    background-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 5px 10px rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+    border-radius: 20px;
+}
+
+.dark-bg .box {
+    position: relative;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.dark-bg .box h2 {
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.dark-bg .box button {
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 6px;
+    background-color: #fff;
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+}
+
+.frmBox {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    border-radius: 10px;
+    background-color: #384141;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    transition: 0.5s ease-in-out;
+    box-shadow: 0 5px 10px rgba(255, 255, 255, 0.3);
+}
+
+.frmBox.active {
+    left: 50%;
+    background-color: #739092;
+}
+
+.frmBox .form {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    padding: 50px;
+    transition: 0.5s;
+}
+
+.frmBox .signInForm {
+    transition-delay: 0.25s;
+}
+
+.frmBox.active .signInForm {
+    left: -100%;
+    transition-delay: 0s;
+}
+
+.frmBox .signUpForm {
+    left: 100%;
+    transition-delay: 0s;
+}
+
+.frmBox.active .signUpForm {
+    left: 0;
+    transition-delay: 0.25s;
+}
+
+.frmBox .form form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.frmBox .form form h3 {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.frmBox .form.signUpForm form h3 {
+    color: #fff;
+}
+
+.frmBox .form.signInForm form h3 {
+    color: #cbe4de;
+}
+
+.frmBox .form .input-container {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.frmBox .form .input-container .input-error {
+    position: absolute;
+    bottom: -17px;
+    left: 10px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.frmBox .form.signInForm .input-container .input-error {
+    color: #d51e1e;
+}
+
+.frmBox .form.signUpForm .input-container .input-error {
+    color: #c71111;
+}
+
+.frmBox .form form input {
+    width: 100%;
+    padding: 10px;
+    outline-color: transparent;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 2px solid #333;
+}
+
+.frmBox .form form input[type="submit"] {
+    cursor: pointer;
+    border: none;
+    max-width: 100px;
+}
+
+.frmBox .form.signInForm form input[type="submit"] {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #cde5dfd3;
+}
+
+.frmBox .form.signUpForm form input[type="submit"] {
+    background-color: rgba(34, 38, 42, 0.662);
+    color: #fff;
+}
+
+.frmBox .form.signInForm form .forgot {
+    color: rgba(205, 229, 223, 0.826);
+}
+
+.frmBox .form.signInForm form .home {
+    color: rgba(205, 229, 223, 0.826);
+    position: absolute;
+    right: 50px;
+}
+
+@media ( max-width : 991px) {
+    .container {
+        max-width: 400px;
+        height: 650px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .container .dark-bg {
+        top: 0;
+        height: 100%;
+    }
+    .frmBox {
+        top: 0;
+        width: 100%;
+        height: 500px;
+        box-shadow: none;
+    }
+    .dark-bg .box {
+        position: absolute;
+        width: 100%;
+        bottom: 0;
+        height: 150px;
+    }
+    .box.sign-in {
+        top: 0;
+    }
+    .frmBox.active {
+        left: 0;
+        top: 150px;
+    }
+}

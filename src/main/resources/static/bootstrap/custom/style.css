@@ -1,0 +1,26 @@
+.bi {
+    -webkit-text-stroke-color: #fff;
+    fill: #fff;
+}
+
+.start-75 {
+    left: 75% !important;
+}
+
+.custom-truncator {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+
+.book-img-md {
+    object-fit: cover;
+    -o-object-fit: cover;
+    width: 100%;
+    height: 100%;
+}
+
+.w-10 {
+    width: 10% !important;
+}
