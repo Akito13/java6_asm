@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 import sof3021.ca4.nhom1.asm.qls.model.Cart;
 import sof3021.ca4.nhom1.asm.qls.model.User;
 import sof3021.ca4.nhom1.asm.qls.service.CartService;
@@ -31,6 +32,11 @@ public class MyFilter extends HttpFilter {
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private CartService cartService;
+
+    @Override
+    public void init() throws ServletException {
+        SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
+    }
 
     @Override
     protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
@@ -92,6 +98,7 @@ public class MyFilter extends HttpFilter {
             req.getSession().setAttribute("cart", cart);
         }
         if(cart != null && (!url.contains("cart/add") || !url.contains("cart/remove"))) {
+            System.out.println("Idk man, why am i even here?");
             req.getSession().setAttribute("cart", cart);
             req.getSession().setAttribute("totalAmount", cartService.getAmount(cart));
             req.getSession().setAttribute("totalCount", cartService.getCount(cart));
