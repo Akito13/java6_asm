@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-    - uses: actions/checkout@v3
+      uses: actions/checkout@v3
     - name: Build and push Docker image to Heroku
-    - uses: AkhileshNS/heroku-deploy@v3.12.14
+      uses: AkhileshNS/heroku-deploy@v3.12.14
       with:
         appdir: "."
         heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
