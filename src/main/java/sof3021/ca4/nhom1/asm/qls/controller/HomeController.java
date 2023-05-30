@@ -17,7 +17,7 @@ public class HomeController {
     @Autowired
     CookieService cookieService;
 
-    @GetMapping(path = {"/"})
+    @GetMapping(path = {"/", "/home"})
     public String home(Model model){
         model.addAttribute("books", bookRepo.findAll());
 //        cookieService.
@@ -25,8 +25,8 @@ public class HomeController {
         return "index";
     }
 
-    @GetMapping("/home")
-    public String toHome() {
-        return "forward:/";
-    }
+//    @GetMapping("/home")
+//    public String toHome() {
+//        return "forward:/" + req.getServletContext().getContextPath();
+//    }
 }

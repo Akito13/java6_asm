@@ -22,7 +22,7 @@
           </p>
           <div>
             <button href="#" class="btn btn-outline-info">Details</button>
-            <a href="/cart/add/${book.maSach}?quantity=1" class="btn btn-outline-light" id="addToCart">Add to cart</a>
+            <a href="${pageContext.servletContext.contextPath}/cart/add/${book.maSach}?quantity=1" class="btn btn-outline-light" id="addToCart">Add to cart</a>
           </div>
         </div>
       </div>

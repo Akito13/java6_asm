@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
-@SessionScope
 public class CartService implements Cartable<Cart, Integer> {
 
     @Autowired

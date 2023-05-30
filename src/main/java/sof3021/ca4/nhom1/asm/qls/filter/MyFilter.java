@@ -1,11 +1,17 @@
 package sof3021.ca4.nhom1.asm.qls.filter;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
+import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+import org.springframework.web.filter.GenericFilterBean;
 import sof3021.ca4.nhom1.asm.qls.model.Cart;
 import sof3021.ca4.nhom1.asm.qls.model.User;
 import sof3021.ca4.nhom1.asm.qls.service.CartService;
@@ -19,8 +25,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Optional;
 
+@Component
 @WebFilter("/*")
-public class MyFilter extends HttpFilter {
+public class MyFilter extends GenericFilterBean {
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
@@ -33,13 +40,13 @@ public class MyFilter extends HttpFilter {
     @Autowired
     private CartService cartService;
 
-    @Override
-    public void init() throws ServletException {
+    @PostConstruct
+    public void init(){
         SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
+        System.out.println("Inside init of MyFilter (@PostConstruct). cartService is: " + cartService);
     }
 
-    @Override
-    protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
+    protected void mainFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
         User user = (User) req.getSession().getAttribute("user");
         Cart cart = (Cart) req.getSession().getAttribute("cart");
 //        cartFilter(req, res, cart, user);
@@ -97,11 +104,16 @@ public class MyFilter extends HttpFilter {
             System.out.println(cart.getUser().getTenKH());
             req.getSession().setAttribute("cart", cart);
         }
-        if(cart != null && (!url.contains("cart/add") || !url.contains("cart/remove"))) {
-            System.out.println("Idk man, why am i even here?");
-            req.getSession().setAttribute("cart", cart);
-            req.getSession().setAttribute("totalAmount", cartService.getAmount(cart));
-            req.getSession().setAttribute("totalCount", cartService.getCount(cart));
+        try {
+            if(cart != null && (!url.contains("cart/add") || !url.contains("cart/remove"))) {
+                System.out.println("Idk man, why am i even here?");
+                req.getSession().setAttribute("cart", cart);
+                req.getSession().setAttribute("totalAmount", cartService.getAmount(cart));
+                req.getSession().setAttribute("totalCount", cartService.getCount(cart));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("WTF IS GOING ON!!!");
         }
 //        Optional<Object> result = cookieService.getValue("cart", true)
 //                .map(Base64Encoder::fromString);
@@ -115,5 +127,10 @@ public class MyFilter extends HttpFilter {
                 return to;
             }
         };
+    }
+
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        mainFilter((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse, filterChain);
     }
 }

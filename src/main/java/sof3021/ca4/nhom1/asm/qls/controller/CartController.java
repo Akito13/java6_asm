@@ -64,7 +64,7 @@ public class CartController {
         req.getSession().setAttribute("cart", cart);
         req.getSession().setAttribute("totalAmount", cartService.getAmount(cart));
         req.getSession().setAttribute("totalCount", cartService.getCount(cart));
-        return "redirect:/home";
+        return "redirect:/";
     }
 
     @GetMapping("/remove/{id}")
