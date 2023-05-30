@@ -49,7 +49,12 @@
 <%--                        </c:forEach>--%>
 <%--                    </c:if>--%>
 <%--                    <c:out value="${totalQuantity}"/>--%>
-                    ${sessionScope.totalCount}
+                    <c:choose>
+                        <c:when test="${not empty sessionScope.totalCount}">
+                            ${sessionScope.totalCount}
+                        </c:when>
+                        <c:otherwise>0</c:otherwise>
+                    </c:choose>
                     <span class="visually-hidden">Current Amount</span>
                 </span>
                 <svg class="bi d-block mx-auto mb-1" width="24" height="24">

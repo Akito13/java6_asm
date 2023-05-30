@@ -1,0 +1,41 @@
+version: '2'
+
+services:
+  db:
+    image: postgres:15.3
+    container_name: dbpostgres
+    restart: always
+    networks:
+      - qls
+    ports:
+      - 5432:5432
+    hostname: postgres
+    environment:
+      - POSTGRES_DB=qls
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=songlong
+      - PGDATA=/var/lib/postgresql/data
+    volumes:
+      - ./target/data.sql:/docker-entrypoint-initdb.d/data.sql
+      - "postgres-data:/var/lib/postgresql/data:Z"
+  app:
+    container_name: qls-app
+    networks:
+      - qls
+    build: .
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/qls
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=songlong
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
+
+networks:
+  qls:
+    driver: bridge
+volumes:
+  postgres-data:
