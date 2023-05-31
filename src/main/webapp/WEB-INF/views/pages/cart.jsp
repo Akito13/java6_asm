@@ -44,7 +44,9 @@
         </jsp:include>
       <tr>
         <td colspan="4"></td>
-        <td class="fs-5 text-success text-center fw-bold">$${sessionScope.totalAmount}</td>
+        <td class="fs-5 text-warning text-center fw-bold">
+            <fmt:formatNumber type="currency" value="${sessionScope.totalAmount}" pattern="$#.##" />
+        </td>
       </tr>
       </tbody>
     </table>
