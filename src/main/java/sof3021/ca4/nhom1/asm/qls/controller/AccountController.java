@@ -21,13 +21,13 @@ public class AccountController {
 
     @GetMapping({"/login", "/signup"})
     public String showLogin(HttpServletRequest req, Model model) {
-        User user = userRepo.findById(1).get();
-        sessionService.setAttribute("user", user);
-        return "redirect:/";
-//        String url = req.getRequestURI();
-//        model.addAttribute("user", new User());
-//        model.addAttribute("active", url.contains("login") ? "":"active");
-//        return "pages/sign-in-up";
+//        User user = userRepo.findById(1).get();
+//        sessionService.setAttribute("user", user);
+//        return "redirect:/";
+        String url = req.getRequestURI();
+        model.addAttribute("user", new User());
+        model.addAttribute("active", url.contains("login") ? "":"active");
+        return "pages/sign-in-up";
     }
 
     @GetMapping("/logout")
