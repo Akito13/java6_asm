@@ -29,7 +29,7 @@
   </symbol>
 </svg>
 <header>
-  <div class="px-3 py-2 text-bg-primary">
+  <div class="px-3 py-2 " style="background: #1d3557">
     <div class="container">
       <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
         <a href="${pageContext.servletContext.contextPath}/" class="nav-link my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
