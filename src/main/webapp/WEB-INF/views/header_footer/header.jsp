@@ -32,6 +32,7 @@
   <div class="px-3 py-2 " style="background: #1d3557">
     <div class="container">
       <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+        <a class="me-5 ms-4" href="${pageContext.servletContext.contextPath}/"><img width="70" height="70" src="${pageContext.request.contextPath}/images/Logo.png" alt="logo"/></a>
         <a href="${pageContext.servletContext.contextPath}/" class="nav-link my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
 <%--          <svg class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap"><use xlink:href="#bootstrap"/></svg>--%>
           <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="#home"/></svg>
@@ -80,8 +81,8 @@
     </div>
   </div>
   <div class="px-3 py-2 border-bottom mb-3 text-bg-dark">
-    <div class="container d-flex flex-wrap justify-content-center">
-      <form class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto" role="search">
+    <div class="container d-flex flex-wrap justify-content-end">
+      <form class="col-12 col-lg-auto mb-2 mb-lg-0 me-4" role="search">
         <input type="search" class="form-control" placeholder="Search..." aria-label="Search">
       </form>
 
@@ -89,7 +90,6 @@
         <c:choose>
             <c:when test="${empty sessionScope.user}">
                 <a href="${pageContext.request.contextPath}/account/login" type="button" class="btn btn-light text-dark me-2">Login</a>
-                <a href="${pageContext.request.contextPath}/account/signup" type="button" class="btn btn-primary">Sign-up</a>
             </c:when>
             <c:otherwise>
                 <a href="${pageContext.request.contextPath}/account/logout" type="button" class="btn btn-outline-light me-2">Logout</a>
