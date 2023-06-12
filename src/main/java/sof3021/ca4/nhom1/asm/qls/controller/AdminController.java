@@ -99,14 +99,15 @@ public class AdminController {
         String action = req.getParameter("action");
         if(result.hasErrors()){
             params.addFlashAttribute("error", "Could not complete task");
+            action = null;
         } else {
             params.addFlashAttribute("message",   (action.equals("create") ? "Created":"Edited")
                     + " successfully");
+            bookRepo.save(book);
         }
         params.addFlashAttribute("org.springframework.validation.BindingResult.book",result );
         params.addFlashAttribute("book", book);
         params.addFlashAttribute("action", action);
-        bookRepo.save(book);
         return "redirect:/admin/book/edit";
     }
 

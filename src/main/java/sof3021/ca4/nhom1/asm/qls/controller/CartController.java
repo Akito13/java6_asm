@@ -3,6 +3,7 @@ package sof3021.ca4.nhom1.asm.qls.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,8 +46,10 @@ public class CartController {
     @GetMapping("/show")
     public String showCart(Model model, HttpServletRequest req){
         String error = (String) model.getAttribute("error");
+        String cartId = "cart" + ((User) sessionService.getAttribute("user")).getMaKH();
         if(error != null)
             model.addAttribute("error", error);
+        model.addAttribute("cartId", cartId);
         model.addAttribute("view", "pages/cart.jsp");
         return "index";
     }
@@ -58,13 +61,14 @@ public class CartController {
             RedirectAttributes params,
             HttpServletRequest req)
     {
-        Cart cart = (Cart) req.getSession().getAttribute("cart");
+        User user = sessionService.getAttribute("user");
+            Cart cart = (Cart) req.getSession().getAttribute("cart"+user.getMaKH());
         try{
             if(cart != null)
             {
                 cart = cartService.addProduct(id, quantity, cart);
                 String cartData = Base64Encoder.toString(cart);
-                cookieService.add("cart", cartData, -1);
+                cookieService.add("cart"+user.getMaKH(), cartData, -1);
                 System.out.println("Cart is not null");
 //                sessionService.setAttribute("cart", cart);
             }
@@ -72,7 +76,7 @@ public class CartController {
             params.addAttribute("error", ex.getMessage());
             ex.printStackTrace();
         }
-        req.getSession().setAttribute("cart", cart);
+        req.getSession().setAttribute("cart"+user.getMaKH(), cart);
         req.getSession().setAttribute("totalAmount", cartService.getAmount(cart));
         req.getSession().setAttribute("totalCount", cartService.getCount(cart));
 
@@ -85,18 +89,19 @@ public class CartController {
             @RequestParam("quantity") int quantity,
             HttpServletRequest req,
             RedirectAttributes params) {
-        Cart cart = (Cart) req.getSession().getAttribute("cart");
+        User user = sessionService.getAttribute("user");
+        Cart cart = (Cart) req.getSession().getAttribute("cart"+user.getMaKH());
         try {
             if(cart != null) {
                 cart = cartService.removeProduct(id, cart, quantity);
                 String cartData = Base64Encoder.toString(cart);
-                cookieService.add("cart", cartData, -1);
+                cookieService.add("cart"+user.getMaKH(), cartData, -1);
             }
         } catch (Exception ex) {
             params.addAttribute("removeFromCartError", ex.getMessage());
             ex.printStackTrace();
         }
-        req.getSession().setAttribute("cart", cart);
+        req.getSession().setAttribute("cart"+user.getMaKH(), cart);
         req.getSession().setAttribute("totalAmount", cartService.getAmount(cart));
         req.getSession().setAttribute("totalCount", cartService.getCount(cart));
         return "redirect:/cart/show";
@@ -104,40 +109,57 @@ public class CartController {
 
     @GetMapping("/clear")
     public String removeAll(HttpServletRequest req){
-        Cart cart = (Cart) req.getSession().getAttribute("cart");
+        User user = sessionService.getAttribute("user");
+        Cart cart = (Cart) req.getSession().getAttribute("cart"+user.getMaKH());
         if(cart != null) {
             cart = cartService.clear(cart);
         }
-        sessionService.setAttribute("cart", cart);
+        sessionService.setAttribute("cart"+user.getMaKH(), cart);
         return "redirect:/cart/show";
     }
 
     @GetMapping("/checkout")
     public String checkout(RedirectAttributes params){
-        Cart cart = (Cart)sessionService.getAttribute("cart");
         User user = (User) sessionService.getAttribute("user");
+        Cart cart = (Cart)sessionService.getAttribute("cart"+user.getMaKH());
         try {
             if(cart != null && user != null) {
                 Order order = new Order();
+                String error = null;
                 order.setUser(user);
                 order.setNgayXuat(new Date());
                 List<OrderDetails> allOrders = order.getOrderDetails();
                 if(allOrders == null) allOrders = new ArrayList<>();
+                List<Integer> allRemaining = bookRepo.findAllRemaining(cart.getOrders().values());
+                int i = 0;
                 for(var item: cart.getOrders().entrySet()){
+                    if(item.getValue().getSoLuongMua() > allRemaining.get(i)) {
+                        error = item.getValue().getTenSach() + " only has " + allRemaining.get(i)
+                                + " copies left";
+                        break;
+                    }
                     double totalAmount = item.getValue().getGia() * item.getValue().getSoLuongMua();
                     OrderDetails details = new OrderDetails();
-                    details.setBook(item.getValue());
+                    Book book = item.getValue();
+                    book.setSoLuong(allRemaining.get(i)-book.getSoLuongMua());
+                    details.setBook(book);
+                    bookRepo.save(book);
                     details.setOrder(order);
-                    details.setSoLuong(item.getValue().getSoLuongMua());
+                    details.setSoLuong(book.getSoLuongMua());
                     details.setTongTien(totalAmount);
                     allOrders.add(details);
+                    i++;
                 }
-//                order.getOrderDetails().;
-                order.setOrderDetails(allOrders);
-                user.getOrders().add(order);
-                orderRepo.save(order);
-                sendMail(user, cart);
-                cartService.clear(cart);
+                if(error == null) {
+                    order.setOrderDetails(allOrders);
+                    user.getOrders().add(order);
+                    orderRepo.save(order);
+                    sendMail(user, cart);
+                    cartService.clear(cart);
+                } else {
+                    params.addFlashAttribute("error", error);
+                    return "redirect:/cart/show";
+                }
             }
             return "redirect:/account/orders";
         } catch (Exception e) {

@@ -47,7 +47,10 @@ public class MyFilter extends GenericFilterBean {
 
     protected void mainFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
         User user = (User) req.getSession().getAttribute("user");
-        Cart cart = (Cart) req.getSession().getAttribute("cart");
+        Cart cart = null;
+        if(user != null) {
+            cart = (Cart) req.getSession().getAttribute("cart"+user.getMaKH());
+        }
         User tempUser = (User) req.getSession().getAttribute("tempUser");
         String uri = req.getRequestURI();
 //        cartFilter(req, res, cart, user);
@@ -91,7 +94,7 @@ public class MyFilter extends GenericFilterBean {
         }
         if(user != null && cart == null) {
             Optional<Object> result = Arrays.stream(req.getCookies())
-                    .filter(cookie -> cookie.getName().equals("cart"))
+                    .filter(cookie -> cookie.getName().equals("cart"+user.getMaKH()))
                     .findAny()
                     .map(cookie -> Base64Encoder.fromString(cookie.getValue()));
 //            Optional<Object> result = cookieService.getValue("cart", true)
@@ -104,11 +107,11 @@ public class MyFilter extends GenericFilterBean {
             }
             cart.setUser(user);
             System.out.println(cart.getUser().getTenKH());
-            req.getSession().setAttribute("cart", cart);
+            req.getSession().setAttribute("cart"+user.getMaKH(), cart);
         }
         try {
             if(cart != null && (!uri.contains("cart/add") || !uri.contains("cart/remove"))) {
-                req.getSession().setAttribute("cart", cart);
+                req.getSession().setAttribute("cart"+user.getMaKH(), cart);
                 req.getSession().setAttribute("totalAmount", cartService.getAmount(cart));
                 req.getSession().setAttribute("totalCount", cartService.getCount(cart));
             }

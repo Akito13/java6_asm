@@ -2,7 +2,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <c:choose>
-  <c:when test="${not empty sessionScope.cart.orders}">
+  <c:when test="${not empty sessionScope.get(cartId).orders}">
     <h3 class="text-danger text-center mb-3">${error}</h3>
     <table class="table table-bordered table-dark table-striped table-responsive-lg container-lg">
       <thead>
@@ -16,7 +16,7 @@
       </tr>
       </thead>
       <tbody id="removable">
-        <c:forEach var="book" items="${sessionScope.cart.orders}" varStatus="status">
+        <c:forEach var="book" items="${sessionScope.get(cartId).orders}" varStatus="status">
           <tr>
               <td class="text-center">${status.count}</td>
               <td class="w-50">

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -14,7 +15,7 @@ import java.util.List;
 @Table(name = "donhang")
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
-public class Order {
+public class Order implements Serializable {
     @Id
     @Column(name = "madh")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_id_generator")
