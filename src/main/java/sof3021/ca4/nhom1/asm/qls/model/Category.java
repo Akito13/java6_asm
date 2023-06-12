@@ -8,7 +8,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "LOAI")
-@Getter @Setter @ToString
+@Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 public class Category implements Serializable {
     @Id

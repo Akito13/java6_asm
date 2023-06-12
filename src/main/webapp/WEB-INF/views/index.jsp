@@ -11,13 +11,14 @@
 <html>
 <head>
     <title>QLS</title>
-
     <link rel="stylesheet" href="${pageContext.servletContext.contextPath}/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="${pageContext.servletContext.contextPath}/bootstrap/bootstrap-icons-1.10.3/bootstrap-icons.css">
     <link rel="stylesheet" href="${pageContext.servletContext.contextPath}/bootstrap/custom/style.css">
 </head>
 <body class="bg-dark">
     <%@include file="header_footer/header.jsp"%>
     <jsp:include page="${view}" />
+    
     <script src="${pageContext.servletContext.contextPath}/bootstrap/js/bootstrap.min.js"></script>
     <script src="${pageContext.servletContext.contextPath}/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="${pageContext.servletContext.contextPath}/bootstrap/js/jquery.min.js"></script>

@@ -68,14 +68,9 @@ public class CartService implements Cartable<Cart, Integer> {
 
     @Override
     public Cart clear(Cart cart) {
-        return null;
+        cart.getOrders().clear();
+        return cart;
     }
-
-//    @Override
-//    public Cart getProducts() {
-//        cart =
-//        return cart;
-//    }
 
     @Override
     public int getCount(Cart cart) {

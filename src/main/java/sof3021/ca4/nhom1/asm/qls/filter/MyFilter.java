@@ -43,46 +43,48 @@ public class MyFilter extends GenericFilterBean {
     @PostConstruct
     public void init(){
         SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
-        System.out.println("Inside init of MyFilter (@PostConstruct). cartService is: " + cartService);
     }
 
     protected void mainFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
         User user = (User) req.getSession().getAttribute("user");
         Cart cart = (Cart) req.getSession().getAttribute("cart");
+        User tempUser = (User) req.getSession().getAttribute("tempUser");
+        String uri = req.getRequestURI();
 //        cartFilter(req, res, cart, user);
-        req = cartFilter(req, res, cart, user);
-        req = userFilter(req, res, user);
+        req = cartFilter(req, res, cart, user, uri);
+        req = userFilter(req, tempUser, user, uri);
         chain.doFilter(req, res);
     }
 
-    protected HttpServletRequest userFilter(HttpServletRequest req, HttpServletResponse res, User user)
+    protected HttpServletRequest userFilter(HttpServletRequest req, User tempUser,
+                                            User user, String uri)
         throws IOException, ServletException
     {
-        String url = req.getRequestURI();
         if(user == null) {
-            if(url.contains("account/logout")
-                    || url.contains("account/info"))
+            if(uri.contains("account/logout")
+                    || uri.contains("account/orders") )
             {
-                req = route(req, Page.HOME);
-                System.out.println("Inside userFilter if()");
-                System.out.println("Current request: " + req.getRequestURI());
+                req = route(req, Page.ACCOUNT_LOGIN);
             }
         } else {
-            if(url.contains("account/signup"))
+            if(uri.contains("account/signup") && uri.contains("account/login"))
             {
-                req = route(req, Page.HOME);
+                req = route(req, Page.ACCOUNT_LOGIN);
                 System.out.println("Inside userFilter else()");
                 System.out.println("Current request: " + req.getRequestURI());
             }
         }
+        if(tempUser == null && (uri.contains("signup/confirm"))) {
+            req = route(req, Page.ACCOUNT_LOGIN);
+        }
         return req;
     }
 
-    protected HttpServletRequest cartFilter(HttpServletRequest req, HttpServletResponse res, Cart cart, User user) {
-        String url = req.getRequestURI();
+    protected HttpServletRequest cartFilter(HttpServletRequest req, HttpServletResponse res,
+                                            Cart cart, User user, String uri) {
         if(user==null) {
-            if(url.contains("cart")) {
-                req = route(req, Page.HOME);
+            if(uri.contains("cart")) {
+                req = route(req, Page.ACCOUNT_LOGIN);
                 System.out.println("Yes");
                 return req;
             }
@@ -105,15 +107,13 @@ public class MyFilter extends GenericFilterBean {
             req.getSession().setAttribute("cart", cart);
         }
         try {
-            if(cart != null && (!url.contains("cart/add") || !url.contains("cart/remove"))) {
-                System.out.println("Idk man, why am i even here?");
+            if(cart != null && (!uri.contains("cart/add") || !uri.contains("cart/remove"))) {
                 req.getSession().setAttribute("cart", cart);
                 req.getSession().setAttribute("totalAmount", cartService.getAmount(cart));
                 req.getSession().setAttribute("totalCount", cartService.getCount(cart));
             }
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("WTF IS GOING ON!!!");
         }
 //        Optional<Object> result = cookieService.getValue("cart", true)
 //                .map(Base64Encoder::fromString);
