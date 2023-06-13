@@ -2,6 +2,7 @@ package sof3021.ca4.nhom1.asm.qls.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.stereotype.Controller;
@@ -19,8 +20,6 @@ import sof3021.ca4.nhom1.asm.qls.utils.Randomizer;
 import sof3021.ca4.nhom1.asm.qls.utils.SessionService;
 
 import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
 
 @Controller
 @RequestMapping("/account")
@@ -46,15 +45,19 @@ public class AccountController {
     public String showLogin(HttpServletRequest req, Model model) {
 //        String url = req.getRequestURI();
         User user = (User) model.getAttribute("signupUser");
+        User loginUser = (User) model.getAttribute("user");
         Integer step = (Integer) model.getAttribute("step");
         String error = String.valueOf(model.getAttribute("signupError"));
         if(user == null) {
             user = new User();
         }
+        if(loginUser == null) {
+            loginUser = new User();
+        }
         if(step == null) step = 1;
         if(!error.equals("null")) model.addAttribute("signupError", error);
         model.addAttribute("signupUser", user);
-        model.addAttribute("user", new User());
+        model.addAttribute("user", loginUser);
         model.addAttribute("active", req.getRequestURI().contains("login") ? "":"active");
         model.addAttribute("step", step);
         model.addAttribute("msg", model.getAttribute("msg"));
@@ -146,23 +149,27 @@ public class AccountController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam("email") Optional<String> email,
-                        @RequestParam("password") Optional<String> password,
-                        Model model){
-        if(email.isEmpty() || password.isEmpty())
+    @Validated
+    public String login(@Validated(User.LoginInfo.class) @ModelAttribute("user") User user,
+                        BindingResult result,
+                        RedirectAttributes params){
+        if(result.hasErrors()) {
+            params.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
+            params.addFlashAttribute("user", user);
             return "redirect:/account/login";
+        }
+        Optional<User> resultUser = userRepo.findByEmail(user.getEmail());
+        resultUser.ifPresentOrElse(user1 -> {
+            if(user1.getPassword().equals(user.getPassword())) {
+                sessionService.setAttribute("user", user1);
+            } else {
+                result.rejectValue("password", "user.password.invalid", "Incorrect password");
+            }
+        }, () -> result.rejectValue("email", "user.email.notfound", "Email not existed"));
+        if(result.hasErrors()) {
+            return "redirect:/account/login";
+        }
 
-        Optional<User> user = userRepo.findByEmail(email.get());
-        if(user.isEmpty())
-        {
-            System.out.println("Empty user");
-            return "redirect:/account/login";
-        }
-        if(!user.get().getPassword().equals(password.get())){
-            System.out.println("Wrong password");
-            return "redirect:/account/login";
-        }
-        sessionService.setAttribute("user", user.get());
         return "redirect:/";
     }
 
@@ -180,16 +187,86 @@ public class AccountController {
         return "index";
     }
 
-    private void invalidateSession(long seconds){
-        Timer t = new Timer();
-        t.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if(session != null) {
-                    session.invalidate();
-                }
-                t.cancel();
+    @GetMapping("/forgot")
+    public String showForgotForm(Model model){
+        String to = (String) model.getAttribute("to");
+        String error = (String) model.getAttribute("error");
+        if(to == null) {
+            to = "forgot";
+        } else {
+            User user = (User) model.getAttribute("forgotUser");
+            if(user == null) user = new User();
+            User forgotUser = sessionService.getAttribute("forgotUser");
+            user.setEmail(forgotUser.getEmail());
+            model.addAttribute("forgotUser", user);
+        }
+        if(error != null)
+            model.addAttribute("error", error);
+        model.addAttribute("to", to);
+        return "pages/forgot-pass";
+    }
+
+    @PostMapping("/forgot")
+    public String processForgot(@RequestParam("email") Optional<String> email,
+                                RedirectAttributes params)
+    {
+        if(email.isEmpty() || email.get().isEmpty()) {
+            params.addFlashAttribute("error", "Please enter a valid email");
+            params.addFlashAttribute("to", null);
+            return "redirect:/account/forgot";
+        }
+        Optional<User> user = userRepo.findByEmail(email.get());
+        String code = Randomizer.random();
+        if(user.isPresent()) {
+            try {
+                mailer.send(user.get().getEmail(),
+                        "Email confirmation",
+                        "Here is your code to regain your password: " + code);
+                sessionService.setAttribute("code", code);
+                sessionService.setAttribute("forgotUser", user.get());
+                params.addFlashAttribute("to", "forgot/confirm");
+//                params.addFlashAttribute("forgotUser", user.get());
+            } catch (Exception e) {
+                params.addFlashAttribute("to", null);
+                params.addFlashAttribute("error", "Something went wrong...");
             }
-        }, seconds * 1000);
+        } else {
+            params.addFlashAttribute("to", null);
+            params.addFlashAttribute("error", "Email not existed");
+        }
+        return "redirect:/account/forgot";
+    }
+
+    @PostMapping("/forgot/confirm")
+    public String confirmForgot(@Validated({User.LoginInfo.class})
+                                    @ModelAttribute("forgotUser") User user,
+                                BindingResult result,
+                                @RequestParam("confirmPassword") Optional<String> cf,
+                                @RequestParam("code") Optional<String> cfc,
+                                RedirectAttributes params)
+    {
+        cf.ifPresentOrElse(
+            s -> {
+                if(!s.equals(user.getPassword())) result.reject("user.confirm.password", "Password did not match");
+            },
+            () -> result.reject("user.confirm.password", "Cannot be empty"));
+        cfc.ifPresentOrElse(s -> {
+            String randomCode = sessionService.getAttribute("code");
+            if(!s.equals(randomCode)) {
+                result.reject("user.confirm.code", "Incorrect code");
+            }
+        }, () -> result.reject("user.confirm.password", "Cannot be empty"));
+        if(result.hasErrors()) {
+            params.addFlashAttribute("org.springframework.validation.BindingResult.forgotUser", result);
+            params.addFlashAttribute("forgotUser", user);
+            params.addFlashAttribute("to", "forgot/confirm");
+            return "redirect:/account/forgot";
+        }
+        User forgotUser = sessionService.getAttribute("forgotUser");
+        forgotUser.setPassword(user.getPassword());
+        userRepo.save(forgotUser);
+        params.addFlashAttribute("msg", "Changed password successfully!");
+        session.invalidate();
+        return "redirect:/account/login";
     }
 }

@@ -39,9 +39,11 @@
         </c:if>
         <div class="input-container">
           <form:input path="email" type="email" placeholder="Email" />
+          <form:errors cssClass="input-error" path="email"/>
         </div>
         <div class="input-container">
           <form:input path="password" type="password" placeholder="Password"/>
+          <form:errors cssClass="input-error" path="password"/>
         </div>
         <div class="input-container">
           <span class="input-error">
@@ -54,7 +56,7 @@
           <input type="submit" value="Login">
         </div>
         <div>
-          <a href="#" class="forgot">Forgot Password?</a>
+          <a href="${pageContext.servletContext.contextPath}/account/forgot" class="forgot">Forgot Password?</a>
           <a href="${pageContext.servletContext.contextPath}/" class="home">Home</a>
         </div>
       </form:form>

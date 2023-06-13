@@ -24,6 +24,7 @@ import sof3021.ca4.nhom1.asm.qls.utils.SessionService;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/cart")
@@ -57,16 +58,17 @@ public class CartController {
     @GetMapping("/add/{id}")
     public String addToCart(
             @PathVariable int id,
-            @RequestParam("quantity") int quantity,
+            @RequestParam("quantity") Optional<Integer> quantity,
             RedirectAttributes params,
             HttpServletRequest req)
     {
         User user = sessionService.getAttribute("user");
-            Cart cart = (Cart) req.getSession().getAttribute("cart"+user.getMaKH());
+        Cart cart = (Cart) req.getSession().getAttribute("cart"+user.getMaKH());
+        Integer slm = quantity.orElse(1);
         try{
             if(cart != null)
             {
-                cart = cartService.addProduct(id, quantity, cart);
+                cart = cartService.addProduct(id, slm, cart);
                 String cartData = Base64Encoder.toString(cart);
                 cookieService.add("cart"+user.getMaKH(), cartData, -1);
                 System.out.println("Cart is not null");
@@ -74,7 +76,6 @@ public class CartController {
             }
         } catch (Exception ex) {
             params.addAttribute("error", ex.getMessage());
-            ex.printStackTrace();
         }
         req.getSession().setAttribute("cart"+user.getMaKH(), cart);
         req.getSession().setAttribute("totalAmount", cartService.getAmount(cart));
