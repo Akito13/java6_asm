@@ -20,7 +20,12 @@
     <div class="d-flex justify-content-center py-4">
         <div class="card text-center mb-3 bg-dark text-white border border-1 border-light rounded-3" style="width: 22rem;">
             <div class="card-body">
-                <h5 class="card-title">Enter your email</h5>
+                <h5 class="card-title">
+                    <c:choose>
+                        <c:when test="${to.contains('confirm')}">Update your password</c:when>
+                        <c:otherwise>Enter your email</c:otherwise>
+                    </c:choose>
+                </h5>
                 <p class="card-text"></p>
                 <c:if test="${not empty error}">
                     <p class="text-danger">${error}</p>
@@ -36,7 +41,7 @@
                                 <form:label path="password" cssClass="float-start form-label">New password</form:label>
                                 <form:input path="password" type="password" cssClass="form-control" />
                                 <form:errors path="password" cssClass="fs-6 text-danger" />
-                            </div>6
+                            </div>
                             <div class="mb-3">
                                 <label for="confirmPassword" class="float-start form-label">Confirm password</label>
                                 <input name="confirmPassword" type="password" class="form-control" id="confirmPassword"/>

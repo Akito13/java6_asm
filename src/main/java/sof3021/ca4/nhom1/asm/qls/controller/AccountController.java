@@ -35,7 +35,7 @@ public class AccountController {
     @Autowired
     private HttpSession session;
 
-    @InitBinder(value = {"loginUser", "signupUser"})
+    @InitBinder(value = {"loginUser", "signupUser", "user"})
     public void initBinder(WebDataBinder binder) {
         StringTrimmerEditor editor = new StringTrimmerEditor(true);
         binder.registerCustomEditor(String.class, editor);
@@ -149,7 +149,6 @@ public class AccountController {
     }
 
     @PostMapping("/login")
-    @Validated
     public String login(@Validated(User.LoginInfo.class) @ModelAttribute("user") User user,
                         BindingResult result,
                         RedirectAttributes params){
@@ -167,6 +166,8 @@ public class AccountController {
             }
         }, () -> result.rejectValue("email", "user.email.notfound", "Email not existed"));
         if(result.hasErrors()) {
+            params.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
+            params.addFlashAttribute("user", user);
             return "redirect:/account/login";
         }
 

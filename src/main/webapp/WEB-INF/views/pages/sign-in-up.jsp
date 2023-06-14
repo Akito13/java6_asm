@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="${pageContext.servletContext.contextPath}/bootstrap/custom/sign-in-up.css">
   <title>Account login</title>
 </head>
-<body>
+<body class="${active}">
 <div class="container">
 <%--  <h3 style="text-align: center; color: #fff;">${msg }</h3>--%>
 <%--  <h3 style="text-align: center; color: #fff;">${unknownError }</h3>--%>
