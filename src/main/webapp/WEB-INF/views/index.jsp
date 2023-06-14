@@ -17,7 +17,7 @@
 </head>
 <body class="bg-dark">
     <%@include file="header_footer/header.jsp"%>
-    <jsp:include page="${view}" />
+<%--    <jsp:include page="${view}" />--%>
     
     <script src="${pageContext.servletContext.contextPath}/bootstrap/js/bootstrap.min.js"></script>
     <script src="${pageContext.servletContext.contextPath}/bootstrap/js/bootstrap.bundle.min.js"></script>
