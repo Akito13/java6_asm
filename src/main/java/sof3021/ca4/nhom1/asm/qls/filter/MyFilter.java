@@ -12,6 +12,7 @@ import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.web.filter.OncePerRequestFilter;
 import sof3021.ca4.nhom1.asm.qls.model.Cart;
 import sof3021.ca4.nhom1.asm.qls.model.User;
 import sof3021.ca4.nhom1.asm.qls.service.CartService;
@@ -26,8 +27,8 @@ import java.util.HashMap;
 import java.util.Optional;
 
 @Component
-@WebFilter("/*")
-public class MyFilter extends GenericFilterBean {
+//@WebFilter("/*")
+public class MyFilter extends OncePerRequestFilter {
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
@@ -106,7 +107,7 @@ public class MyFilter extends GenericFilterBean {
                 cart.setOrders(new HashMap<>());
             }
             cart.setUser(user);
-            System.out.println(cart.getUser().getTenKH());
+            System.out.println("INSIDE CART FILTER: user is not null and cart is null" + cart.getUser().getTenKH());
             req.getSession().setAttribute("cart"+user.getMaKH(), cart);
         }
         try {
@@ -132,8 +133,13 @@ public class MyFilter extends GenericFilterBean {
         };
     }
 
+//    @Override
+//    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+//
+//    }
+
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        mainFilter((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse, filterChain);
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        mainFilter( request,  response, filterChain);
     }
 }

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="~{index::view(~{::body})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+  <div class="py-4 my-4 row">
+    <aside class="col-12 col-lg-4">
+      <div class="w-75 float-lg-end mx-auto text-center text-white" style="height: 420px;">
+        <div id="pickImg" th:class="|w-100 border border-3 border-primary h-100
+                   d-flex justify-content-center align-items-center flex-column ${book.img != null ? 'd-none':''}|"
+        style="cursor: pointer; color: #73BBC9; font-size: 3rem">
+        <i class="bi bi-plus-circle-dotted"></i>
+        <p class="fs-3 text-white">Add an image</p>
+      </div>
+      <img id="bookImg" th:src="@{|/images/${book.img}|}"
+           alt="Book thumbnail" th:class="|h-100 img-fluid pointer-event ${book.img != null ? '':'d-none'}|" style="cursor: pointer"/>
+  </div>
+  </aside>
+  <div class="col-12 col-lg-8">
+    <div class="mx-auto rounded-3 border-1 border-light border w-75 py-4" style="padding-left: 3rem; padding-right:  3rem;">
+      <form th:action="@{/admin/book/edit(action=${action})}" th:object="${book}" class="position-relative" enctype="multipart/form-data" method="post">
+        <h3 class="text-success mb-3" th:text="${message}" th:if="${message != null}"></h3>
+        <h3 class="text-danger mb-3" th:text="${error}" th:if="${error != null}"></h3>
+        <div class="mb-3" th:if="${action.equals('edit')}">
+          <label for="maSach" class="form-label text-white">Book ID</label>
+          <input th:field="*{maSach}" type="text" class="form-control" id="maSach" readonly/>
+        </div>
+        <div class="mb-3">
+          <label for="tenSach" class="form-label text-white">Book name</label>
+          <input th:field="*{tenSach}" type="text" class="form-control" id="tenSach" />
+          <p th:errors="*{tenSach}" th:if="*{#fields.hasErrors('tenSach')}" class="text-danger"></p>
+        </div>
+        <div class="mb-3">
+          <label for="tacGia" class="form-label text-white">Author</label>
+          <input th:field="*{tacGia}" type="text" class="form-control" id="tacGia" />
+          <p th:errors="*{tacGia}" th:if="*{#fields.hasErrors('tacGia')}" class="text-danger"></p>
+        </div>
+        <div class="mb-3">
+          <label for="tacGia" class="form-label text-white">Category</label>
+          <select th:field="*{loai.maLoai}" class="form-select" aria-label="Default select example">
+            <option th:each="category: ${categories}" th:value="${category.maLoai}" th:label="${category.tenLoai}"></option>
+<!--            <options items="${categories}" itemValue="maLoai" itemLabel="tenLoai"/>-->
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="gia" class="form-label text-white">Price</label>
+          <div class="input-group">
+            <span class="input-group-text">đ</span>
+            <input th:field="*{gia}" type="text" class="form-control" id="gia" />
+          </div>
+          <p th:errors="*{gia}" th:if="${#fields.hasErrors('gia')}" class="text-danger"></p>
+        </div>
+        <div class="mb-3">
+          <label for="nxb" class="form-label text-white">Publish Date</label>
+          <input th:field="*{nxb}" type="text" class="form-control" id="nxb" />
+          <p th:errors="*{nxb}" th:if="${#fields.hasErrors('nxb')}" class="text-danger"></p>
+        </div>
+        <div class="mb-3">
+          <label for="soLuong" class="form-label text-white">Quantity</label>
+          <input th:field="*{soLuong}" type="text" class="form-control" id="soLuong" />
+          <p th:errors="*{soLuong}" th:if="${#fields.hasErrors('soLuong')}" class="text-danger"></p>
+        </div>
+        <div class="mb-3">
+          <label for="springImg" class="form-label text-white">Image</label>
+          <input th:field="*{img}" id="springImg" class="form-control" readonly/>
+          <p th:errors="*{img}" th:if="${#fields.hasErrors('img')}" class="text-danger"></p>
+          <input type="file" class="d-none" id="img" name="hiddenImgInput" accept="image/png,image/jpeg,image/jpg,image/webp"/>
+        </div>
+        <div class="mb-2">
+          <button class="btn btn-outline-primary" th:text="${#strings.toUpperCase(action)}"></button>
+        </div>
+      </form>
+    </div>
+  </div>
+  </div>
+  <script th:src="@{/bootstrap/custom/upload.js}"></script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{/index::view(~{::body})}"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+  <th:block th:if="${book != null}">
+    <article class="row row-cols-lg-2 row-cols-1 px-lg-3 px-4 mt-5
+                    border-bottom border-1 border-secondary pb-5 mx-auto" style="width: 90%">
+      <aside class="col col-lg-5">
+        <div class="w-75 float-lg-end mx-auto text-center text-lg-start" style="height: 420px;">
+          <img th:src="@{|/images/${book.img}|}" th:alt="|Book thumbnail|" class="h-100 img-fluid">
+        </div>
+      </aside>
+      <main class="col col-lg-7 text-white py-3 px-0">
+        <h2 class="text-center text-lg-start" th:id="|book-${book.maSach}|">[[${book.tenSach}]]</h2>
+        <p class="text-secondary fw-semibold fs-5">Author: [[${book.tacGia}]]</p>
+        <p class="text-secondary fw-semibold fs-5">Publish date: [[${book.nxb}]]</p>
+        <p class="fs-3 fw-semibold mt-3" style="color: #73BBC9">
+          Price: [[${#numbers.formatDecimal(book.gia, 0, 'COMMA', 0, 'POINT')}]]đ
+          <span class="fs-6 fw-normal text-white">(Remaining: [[${book.soLuong}]])</span>
+        </p>
+        <form th:action="@{|/cart/add/${book.maSach}|}" method="get">
+          <div class="d-flex w-50 justify-content-start align-items-center">
+            <label class="fs-5 " for="qt">Amount: </label>
+            <input class="form-control w-25 ms-3" id="qt" pattern="[0-9]*" type="text" name="quantity" inputmode="numeric" placeholder="1">
+            <input type="hidden" name="from" th:value="${from}">
+            <button type="submit" class="btn btn-outline-light ms-3">Add to cart</button>
+          </div>
+        </form>
+        <th:block sec:authorize="${isAuthenticated()}">
+          <th:block th:each="auth: ${#authentication.authorities}">
+            <div th:if="${auth.authority.equals('ADMIN')}" class="d-flex admin mt-5" id="removable">
+              <a th:href="@{|/admin/book/update/${book.maSach}|}" class="btn btn-primary me-3">Update</a>
+              <button th:id="|brbtn-${book.maSach}|" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal" class="btn btn-danger">Remove</button>
+              <th:block th:replace="~{/modals/confirm-modal::modal('Deleting book...')}"></th:block>
+            </div>
+          </th:block>
+        </th:block>
+      </main>
+    </article>
+    <h3 class="fw-semibold text-info mt-4 text-center ps-5 text-lg-start mx-lg-auto" style="width: 90%">Related books:</h3>
+    <div id="carouselExampleFade" class="carousel slide ">
+      <div class="carousel-inner px-5">
+        <th:block th:each="loop: ${#numbers.sequence(0, books.size() - 1, 3)}">
+          <div th:class="|carousel-item ${loop == 0 ? 'active' : ''} p-4|">
+            <div class="d-flex justify-content-center">
+              <div th:replace="~{/common/book::show-book-info(
+                  ${books.get(loop).maSach},
+                  ${books.get(loop).tenSach},
+                  ${books.get(loop).nxb},
+                  ${books.get(loop).img},
+                  ${books.get(loop).soLuong},
+                  ${books.get(loop).gia})}">
+              </div>
+              <th:block th:if="${loop <= books.size() - 2}">
+                <div th:replace="~{/common/book::show-book-info(
+                  ${books.get(loop + 1).maSach},
+                  ${books.get(loop + 1).tenSach},
+                  ${books.get(loop + 1).nxb},
+                  ${books.get(loop + 1).img},
+                  ${books.get(loop + 1).soLuong},
+                  ${books.get(loop + 1).gia})}">
+                </div>
+              </th:block>
+              <th:block th:if="${loop <= books.size() - 3}">
+                <div th:replace="~{/common/book::show-book-info(
+                  ${books.get(loop + 2).maSach},
+                  ${books.get(loop + 2).tenSach},
+                  ${books.get(loop + 2).nxb},
+                  ${books.get(loop + 2).img},
+                  ${books.get(loop + 2).soLuong},
+                  ${books.get(loop + 2).gia})}">
+                </div>
+              </th:block>
+            </div>
+          </div>
+        </th:block>
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </div>
+  </th:block>
+
+  <div th:unless="${book != null}" class="w-100 text-center pt-3">
+    <div>
+      <img th:src="@{/images/notfound.jpg}" alt="Book not found image." style="width: 300px;"/>
+    </div>
+    <h3 class="fw-bold fs-2 mx-auto rounded-pill w-50" style="color: #73BBC9">No book found</h3>
+    <a th:href="@{/books}" class="btn btn-outline-secondary mt-3">Search the books you want!</a>
+  </div>
+</body>
+</html>

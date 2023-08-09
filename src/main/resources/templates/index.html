@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="view(part)">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/bootstrap/bootstrap-icons-1.10.3/bootstrap-icons.css}">
+    <link rel="stylesheet" th:href="@{/bootstrap/custom/style.css}">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.js"></script>
+    <title>QLS</title>
+</head>
+<body class="bg-dark" ng-app="myapp">
+    <header th:replace="~{/header_footer/header::header}"></header>
+    <main th:replace="${part}"></main>
+    <script th:src="@{/bootstrap/js/bootstrap.min.js}"></script>
+    <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/bootstrap/js/jquery.min.js}"></script>
+    <script th:src="@{/bootstrap/custom/index.js}"></script>
+</body>
+</html>

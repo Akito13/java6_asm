@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+  th:replace="~{index::view(~{::body})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+  <th:block th:if="${orders != null}">
+    <h3 th:if="${error != null}" th:text="${error}" class="text-danger text-center mb-3"></h3>
+    <table class="table table-bordered table-dark table-striped table-responsive-lg container-lg">
+      <thead>
+      <tr class="text-center">
+        <th scope="col">#</th>
+        <th scope="col">Book's name</th>
+        <th scope="col">Quantity</th>
+        <th scope="col">Total Amount</th>
+        <th scope="col">Order No</th>
+      </tr>
+      </thead>
+      <tbody id="removable">
+      <th:block th:each="order, status: ${orders}">
+        <tr>
+          <td class="text-center" th:text="${order.maDhct}"></td>
+          <td class="w-50">
+            <span class="d-block w-100" style="word-break: break-all"
+                  th:id="|book-${order.book.maSach}|" th:text="${order.book.tenSach}"></span>
+          </td>
+          <td class="text-center w-10" th:text="${order.soLuong}"></td>
+          <td class="text-center w-10" th:text="${#numbers.formatDecimal(order.tongTien, 0, 'COMMA', 0, 'POINT') + 'đ'}"></td>
+          <td class="text-center" th:text="${order.order.maDH}"></td>
+        </tr>
+      </th:block>
+      </tbody>
+    </table>
+  </th:block>
+  <div th:unless="${orders != null}" class="w-100 text-center pt-3">
+    <div>
+      <img th:src="@{/images/notfound.jpg}" th:alt="'Book not found image.'" style="width: 300px;"/>
+    </div>
+    <h3 class="fw-bold fs-2 mx-auto rounded-pill w-50" style="color: #73BBC9">You have no orders yet</h3>
+    <a th:href="@{/books}" class="btn btn-outline-secondary mt-3">Search the books you want!</a>
+  </div>
+</body>
+</html>

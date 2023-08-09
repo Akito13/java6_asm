@@ -1,5 +1,7 @@
 package sof3021.ca4.nhom1.asm.qls.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,6 +24,7 @@ public class Order implements Serializable {
     @SequenceGenerator(name = "order_id_generator", sequenceName = "donhang_madh_seq", allocationSize = 1)
     private Integer maDH;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "makh")
     private User user;
@@ -31,6 +34,16 @@ public class Order implements Serializable {
     @Column(name = "ngayxuat")
     private Date ngayXuat;
 
+    @Column(name = "tennguoinhan")
+    private String tenNguoiNhan;
+
+    @Column(name = "sdt")
+    private String sdt;
+
+    @Column(name = "diachinhan")
+    private String diaChiNhan;
+
+    @JsonManagedReference
     @OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     private List<OrderDetails> orderDetails;
 }

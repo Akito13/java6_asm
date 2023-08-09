@@ -17,6 +17,7 @@ import sof3021.ca4.nhom1.asm.qls.repository.BookRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Controller
 @RequestMapping("/books")
@@ -39,12 +40,12 @@ public class BookController {
         Pageable pageable = PageRequest.of(currentPage.orElse(0), 6, sort);
         Page<Book> page = bookRepo.findAllByTenSachLike("%"+kw+"%", pageable);
         setAttributes(model,
-                new String[] {"view", "order", "sort", "keywords"},
-                new String[] {"pages/show-room.jsp", ob, sb, kw});
+                new String[] { "order", "sort", "keywords"},
+                new String[] { ob, sb, kw});
         model.addAttribute("books", page.getContent());
         model.addAttribute("page", page);
         model.addAttribute("from", "/books");
-        return "index";
+        return "pages/show-room";
     }
 
     @GetMapping("/{id}")
@@ -64,8 +65,8 @@ public class BookController {
             }
             else model.addAttribute("books", null);
         }
-        setAttributes(model, new String[] {"view"}, new String[] {"pages/book-details.jsp"});
-        return "index";
+//        setAttributes(model, new String[] {"view"}, new String[] {"pages/book-details.jsp"});
+        return "pages/book-details";
     }
 
     private void setAttributes(Model model, String[] names, String[] values) {

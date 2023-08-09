@@ -72,8 +72,8 @@ public class AdminController {
         if(action == null) action = "create";
         model.addAttribute("book", book);
         model.addAttribute("action", action);
-        model.addAttribute("view", "pages/admin.jsp");
-        return "index";
+//        model.addAttribute("view", "pages/admin.jsp");
+        return "pages/admin";
     }
 
     @PostMapping("/book/edit")

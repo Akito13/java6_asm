@@ -1,5 +1,7 @@
 package sof3021.ca4.nhom1.asm.qls.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -53,8 +55,12 @@ public class Book implements Serializable {
     @NotNull(message = "Quantity cannot be empty")
     private Integer soLuong;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "book")
     private List<OrderDetails> orderDetails;
+    
+    @Column(name = "chitiet")
+    private String chiTiet;
 
     @Transient
     private int soLuongMua;

@@ -1,102 +1,79 @@
 package sof3021.ca4.nhom1.asm.qls.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import sof3021.ca4.nhom1.asm.qls.model.*;
 import sof3021.ca4.nhom1.asm.qls.repository.BookRepository;
-import sof3021.ca4.nhom1.asm.qls.repository.OrderDetailsRepository;
 import sof3021.ca4.nhom1.asm.qls.repository.OrderRepository;
+import sof3021.ca4.nhom1.asm.qls.repository.UserRepository;
 import sof3021.ca4.nhom1.asm.qls.service.CartService;
 import sof3021.ca4.nhom1.asm.qls.service.MailService;
 import sof3021.ca4.nhom1.asm.qls.utils.Base64Encoder;
 import sof3021.ca4.nhom1.asm.qls.utils.CookieService;
-import sof3021.ca4.nhom1.asm.qls.utils.SessionService;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
-@Controller
-@RequestMapping("/cart")
-public class CartController {
-
+@RestController
+@RequestMapping("/api/cart")
+public class CartRestController {
     @Autowired
-    private SessionService sessionService;
+    HttpSession session;
     @Autowired
     private CartService cartService;
+    @Autowired
+    private CookieService cookieService;
     @Autowired
     private BookRepository bookRepo;
     @Autowired
     private OrderRepository orderRepo;
     @Autowired
-    private CookieService cookieService;
-    @Autowired
     private MailService mailService;
 
-
-    @GetMapping("/show")
-    public String showCart(Model model, HttpServletRequest req){
-        String error = (String) model.getAttribute("error");
-        String cartId = "cart" + ((User) sessionService.getAttribute("user")).getMaKH();
-        if(error != null)
-            model.addAttribute("error", error);
-        model.addAttribute("cartId", cartId);
-//        model.addAttribute("view", "pages/cart.jsp");
-        return "pages/cart";
+    @GetMapping("/user")
+    public Integer getUserId(){
+        User user = (User) session.getAttribute("user");
+        if(user == null) return -1;
+        return user.getMaKH();
     }
-
-    @GetMapping("/add/{id}")
-    public String addToCart(
-            @PathVariable int id,
-            @RequestParam("quantity") Optional<Integer> quantity,
-            RedirectAttributes params,
-            HttpServletRequest req)
-    {
-        User user = sessionService.getAttribute("user");
-        Cart cart = (Cart) req.getSession().getAttribute("cart"+user.getMaKH());
-        Integer slm = quantity.orElse(1);
-        try{
-            if(cart != null)
-            {
-                cart = cartService.addProduct(id, slm, cart);
-                String cartData = Base64Encoder.toString(cart);
-                cookieService.add("cart"+user.getMaKH(), cartData, -1);
-                System.out.println("Cart is not null");
-//                sessionService.setAttribute("cart", cart);
+    @GetMapping(path = {"", "/"})
+    public Cart getCart(){
+        User user = (User) session.getAttribute("user");
+        if(user != null) {
+            Cart cart = (Cart) session.getAttribute("cart"+user.getMaKH());
+            for(Map.Entry<Integer, Book> order: cart.getOrders().entrySet()){
+                System.out.println(order.getKey() + " " + order.getValue().getTenSach() + " is in " + order.getValue().getLoai().getTenLoai() + " category");
             }
-        } catch (Exception ex) {
-            params.addAttribute("error", ex.getMessage());
+//            System.out.println("INSIDE GETCART(): " + cart);
+//            Hibernate.initialize(cart.getOrders());
+            return cart;
         }
-        req.getSession().setAttribute("cart"+user.getMaKH(), cart);
-        req.getSession().setAttribute("totalAmount", cartService.getAmount(cart));
-        req.getSession().setAttribute("totalCount", cartService.getCount(cart));
-
-        return "redirect:"+req.getParameter("from");
+        return null;
     }
-
     @GetMapping("/remove/{id}")
-    public String removeFromCart(
-            @PathVariable int id,
-            @RequestParam("quantity") int quantity,
-            HttpServletRequest req,
-            RedirectAttributes params) {
-        User user = sessionService.getAttribute("user");
+    public Cart removeFromCart(@PathVariable int id,
+                                 @RequestParam("quantity") int quantity,
+                                 HttpServletRequest req,
+                                 RedirectAttributes params){
+        User user = (User) session.getAttribute("user");
         Cart cart = (Cart) req.getSession().getAttribute("cart"+user.getMaKH());
         try {
             if(cart != null) {
                 cart = cartService.removeProduct(id, cart, quantity);
-                String cartData = Base64Encoder.toString(cart);
-                cookieService.add("cart"+user.getMaKH(), cartData, -1);
+                int totalCount = cartService.getCount(cart);
+                if(totalCount == 0) {
+                    session.setAttribute("cart"+user.getMaKH(), null);
+                    cookieService.remove("cart"+user.getMaKH());
+                } else {
+                    String cartData = Base64Encoder.toString(cart);
+                    cookieService.add("cart"+user.getMaKH(), cartData, -1);
+                }
             }
         } catch (Exception ex) {
             params.addAttribute("removeFromCartError", ex.getMessage());
@@ -105,24 +82,25 @@ public class CartController {
         req.getSession().setAttribute("cart"+user.getMaKH(), cart);
         req.getSession().setAttribute("totalAmount", cartService.getAmount(cart));
         req.getSession().setAttribute("totalCount", cartService.getCount(cart));
-        return "redirect:/cart/show";
+        return cart;
     }
 
     @GetMapping("/clear")
-    public String removeAll(HttpServletRequest req){
-        User user = sessionService.getAttribute("user");
+    public Cart removeAll(HttpServletRequest req){
+        User user = (User) session.getAttribute("user");
         Cart cart = (Cart) req.getSession().getAttribute("cart"+user.getMaKH());
         if(cart != null) {
             cart = cartService.clear(cart);
         }
-        sessionService.setAttribute("cart"+user.getMaKH(), cart);
-        return "redirect:/cart/show";
+        session.setAttribute("cart"+user.getMaKH(), null);
+        cookieService.remove("cart"+user.getMaKH());
+        return cart;
     }
 
     @GetMapping("/checkout")
-    public String checkout(RedirectAttributes params){
-        User user = (User) sessionService.getAttribute("user");
-        Cart cart = (Cart)sessionService.getAttribute("cart"+user.getMaKH());
+    public Cart checkout(RedirectAttributes params){
+        User user = (User) session.getAttribute("user");
+        Cart cart = (Cart)session.getAttribute("cart"+user.getMaKH());
         try {
             if(cart != null && user != null) {
                 Order order = new Order();
@@ -157,19 +135,20 @@ public class CartController {
                     orderRepo.save(order);
                     sendMail(user, cart);
                     cartService.clear(cart);
+                    session.setAttribute("cart"+user.getMaKH(), null);
+                    cookieService.remove("cart"+user.getMaKH());
                 } else {
                     params.addFlashAttribute("error", error);
-                    return "redirect:/cart/show";
+                    return cart;
                 }
             }
-            return "redirect:/account/orders";
+            return cart;
         } catch (Exception e) {
             e.printStackTrace();
             params.addFlashAttribute("error", "Something went wrong...");
-            return "redirect:/cart/show";
+            return cart;
         }
     }
-
     private boolean sendMail(User user, Cart cart){
         StringBuilder builder = new StringBuilder();
         builder.append("<p>Dear customer, " + user.getTenKH() + "</p>");

@@ -1,5 +1,7 @@
 package sof3021.ca4.nhom1.asm.qls.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -53,6 +55,7 @@ public class User implements Serializable {
     @PasswordConstraint(groups = {LoginInfo.class})
     private String password;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<Order> orders;
 

@@ -5,6 +5,14 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,9 +27,11 @@ import sof3021.ca4.nhom1.asm.qls.service.MailService;
 import sof3021.ca4.nhom1.asm.qls.utils.Randomizer;
 import sof3021.ca4.nhom1.asm.qls.utils.SessionService;
 
+import java.util.List;
 import java.util.Optional;
 
 @Controller
+@EnableWebSecurity
 @RequestMapping("/account")
 public class AccountController {
     @Autowired
@@ -82,6 +92,7 @@ public class AccountController {
         }
         params.addFlashAttribute("org.springframework.validation.BindingResult.signupUser", result);
         params.addFlashAttribute("signupUser", user);
+        System.out.println("After posting first signup: " + user.getPassword());
         return "redirect:/account/signup";
     }
 
@@ -93,6 +104,11 @@ public class AccountController {
         String goToPage = "/account/signup/confirm";
         userRepo.findBySdt(user.getSdt()).ifPresent(user1 -> result.rejectValue("sdt", "dup.user.sdt", "Phone number already existed"));
         if(result.hasErrors()) {
+            System.out.println(user.getTenKH());
+            System.out.println(user.getDiaChi());
+            System.out.println(user.getSdt());
+            System.out.println(user.getEmail());
+            System.out.println(user.getPassword());
             params.addFlashAttribute("signupError", "Please fix invalid fields");
             params.addFlashAttribute("step", 2);
             goToPage = "/account/signup";
@@ -148,10 +164,13 @@ public class AccountController {
         return "redirect:/account/login";
     }
 
-    @PostMapping("/login")
+    @PostMapping("/login/process")
     public String login(@Validated(User.LoginInfo.class) @ModelAttribute("user") User user,
                         BindingResult result,
-                        RedirectAttributes params){
+                        RedirectAttributes params,
+                        HttpServletRequest request){
+        System.out.println("INSIDE POST MAPPING LOGIN");
+//        session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
         if(result.hasErrors()) {
             params.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
             params.addFlashAttribute("user", user);
@@ -160,6 +179,11 @@ public class AccountController {
         Optional<User> resultUser = userRepo.findByEmail(user.getEmail());
         resultUser.ifPresentOrElse(user1 -> {
             if(user1.getPassword().equals(user.getPassword())) {
+                GrantedAuthority authority = new SimpleGrantedAuthority(user1.isAdmin() ? "ADMIN":"USER");
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user1.getEmail(), null, List.of(authority));
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                session = request.getSession(true);
+                sessionService.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
                 sessionService.setAttribute("user", user1);
             } else {
                 result.rejectValue("password", "user.password.invalid", "Incorrect password");
@@ -183,9 +207,9 @@ public class AccountController {
     @GetMapping("/orders")
     public String showOrders(Model model) {
         User user = (User) sessionService.getAttribute("user");
-        model.addAttribute("view", "pages/account-orders.jsp");
+//        model.addAttribute("view", "pages/account-orders.jsp");
         model.addAttribute("orders", odRepo.findAllByUserId(user.getMaKH()));
-        return "index";
+        return "pages/account-orders";
     }
 
     @GetMapping("/forgot")
@@ -269,5 +293,12 @@ public class AccountController {
         params.addFlashAttribute("msg", "Changed password successfully!");
         session.invalidate();
         return "redirect:/account/login";
+    }
+
+    private boolean isAuthenticated(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if(auth == null || AnonymousAuthenticationToken.class.isAssignableFrom(auth.getClass()))
+            return false;
+        return auth.isAuthenticated();
     }
 }

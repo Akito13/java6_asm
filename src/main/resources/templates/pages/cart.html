@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{index::view(~{::body})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body ng-controller="cart-ctrl">
+    <th:block th:if="${session.get(cartId) != null &&
+                        session.get(cartId).orders != null &&
+                        !#maps.isEmpty(session.get(cartId).orders)}">
+<!--      <div ng-if="cart != undefined && cart.payload != undefined && cart.payload.orders != undefined">-->
+        <h3 class="text-danger text-center mb-3" th:text="${error}" th:if="${error != null}"></h3>
+        <table class="table table-bordered table-dark table-striped table-responsive-lg container-lg">
+          <thead>
+            <tr class="text-center">
+              <th scope="col">#</th>
+              <th scope="col">Book's name</th>
+              <th scope="col">Quantity</th>
+              <th scope="col">Price</th>
+              <th scope="col">Total</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody id="removable">
+            <tr ng-repeat="(maSach, sach) in cart.payload.orders">
+              <td class="text-center">{{$index+1}}</td>
+              <td class="w-50">
+                <span class="d-block w-100" style="word-break: break-all"
+                      id="book-{{maSach}}">{{sach.tenSach}}</span>
+              </td>
+              <td class="text-center w-10">{{sach.soLuongMua}}</td>
+              <td class="text-center w-10">{{sach.gia | number }}đ</td>
+              <td class="text-center">{{sach.gia * sach.soLuongMua | number}}</td>
+              <td class="w-10 text-center">
+                <button id="brbtn-{{maSach}}" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal" class="btn btn-danger">Remove</button>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="4"></td>
+              <td class="fs-5 text-warning text-center fw-bold">{{cart.calTotal() | number}}đ</td>
+            </tr>
+          </tbody>
+        </table>
+<!--      <table class="table table-bordered table-dark table-striped table-responsive-lg container-lg">-->
+<!--        <thead>-->
+<!--          <tr class="text-center">-->
+<!--            <th scope="col">#</th>-->
+<!--            <th scope="col">Book's name</th>-->
+<!--            <th scope="col">Quantity</th>-->
+<!--            <th scope="col">Price</th>-->
+<!--            <th scope="col">Total</th>-->
+<!--            <th scope="col"></th>-->
+<!--          </tr>-->
+<!--        </thead>-->
+<!--        <tbody id="removable">-->
+<!--          <th:block th:each="book, status: ${session.get(cartId).orders}">-->
+<!--            <tr>-->
+<!--              <td class="text-center" th:text="${status.count}"></td>-->
+<!--              <td class="w-50">-->
+<!--                <span class="d-block w-100" style="word-break: break-all"-->
+<!--                      th:id="|book-${book.value.maSach}|" th:text="${book.value.tenSach}"></span>-->
+<!--              </td>-->
+<!--              <td class="text-center w-10" th:text="${book.value.soLuongMua}"></td>-->
+<!--              <td class="text-center w-10" th:text="${'$' + book.value.gia}"></td>-->
+<!--              <td class="text-center" th:text="${'$' + #numbers.formatDecimal(book.value.soLuongMua * book.value.gia, 0, 'COMMA', 2, 'POINT')}"></td>-->
+<!--              <td class="w-10 text-center">-->
+<!--                <button th:id="|brbtn-${book.value.maSach}|" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal" class="btn btn-danger">Remove</button>-->
+<!--              </td>-->
+<!--            </tr>-->
+<!--          </th:block>-->
+<!--          <th:block th:replace="~{/modals/confirm-modal::modal('Remove book from cart')}"></th:block>-->
+<!--          <tr>-->
+<!--            <td colspan="4"></td>-->
+<!--            <td class="fs-5 text-warning text-center fw-bold" th:text="${'$' + #numbers.formatDecimal(session.totalAmount, 0, 'COMMA', 2, 'POINT')}"></td>-->
+<!--          </tr>-->
+<!--        </tbody>-->
+<!--      </table>-->
+        <div class="container-lg d-flex justify-content-end">
+          <button ng-click="cart.clear()" class="btn btn-danger">Remove all</button>
+          <button ng-click="cart.checkout()" class="btn btn-primary ms-5">Check out</button>
+        </div>
+<!--      </div>-->
+    </th:block>
+<!--    <div ng-if="!cart || !cart.payload || !cart.payload.orders" class="w-100 text-center pt-3">-->
+<!--      <h3 class="fw-bold fs-2 mx-auto rounded-pill w-50" style="color: #73BBC9">No book found</h3>-->
+<!--      <a href="/books" class="btn btn-outline-secondary mt-3">Search the books you want!</a>-->
+<!--    </div>-->
+    <th:block th:replace="~{/modals/confirm-modal::modal('Remove book from cart')}"></th:block>
+    <div th:if="${session.get(cartId) == null ||
+        session.get(cartId).orders == null ||
+        #maps.isEmpty(session.get(cartId).orders)}" class="w-100 text-center pt-3">
+      <div>
+        <img th:src="@{/images/notfound.jpg}" alt="Book not found image." style="width: 300px;"/>
+      </div>
+      <h3 class="fw-bold fs-2 mx-auto rounded-pill w-50" style="color: #73BBC9">No book found</h3>
+      <a href="/books" class="btn btn-outline-secondary mt-3">Search the books you want!</a>
+    </div>
+</body>
+</html>

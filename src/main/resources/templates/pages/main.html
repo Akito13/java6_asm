@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{/index::view(~{::body})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 container-fluid mx-auto">
+        <div class="col mb-3" th:each="book: ${books}">
+            <div th:replace="~{/common/book::show-book-info(
+                ${book.maSach},
+                ${book.tenSach},
+                ${book.nxb},
+                ${book.img},
+                ${book.soLuong},
+                ${book.gia})}">
+            </div>
+        </div>
+    </div>
+</body>
+</html>

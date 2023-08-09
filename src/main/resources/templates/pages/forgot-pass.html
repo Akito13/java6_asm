@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+  <title>Forgot password</title>
+  <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}">
+  <link rel="stylesheet" th:href="@{/bootstrap/bootstrap-icons-1.10.3/bootstrap-icons.css}">
+</head>
+<body class="bg-dark">
+    <div class="d-flex justify-content-center py-4">
+        <div class="card text-center mb-3 bg-dark text-white border border-1 border-light rounded-3" style="width: 22rem;">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <th:block th:if="${to.contains('confirm')}">Update your password</th:block>
+                    <th:block th:unless="${to.contains('confirm')}">Enter your email</th:block>
+                </h5>
+                <p class="card-text"></p>
+                <p class="text-danger" th:if="${error != null}" th:text="${error}"></p>
+                <form th:if="${to.contains('confirm')}" method="post" action="/account/forgot/confirm" th:object="${forgotUser}">
+                    <div class="mb-3">
+                        <input th:field="*{email}" class="form-control d-none" />
+                        <p th:errors="*{email}" class="fs-6 text-danger d-none" ></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="float-start form-label">New password</label>
+                        <input th:field="*{password}" type="password" class="form-control" />
+                        <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="fs-6 text-danger" ></p>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="float-start form-label">Confirm password</label>
+                        <input name="confirmPassword" type="password" class="form-control" id="confirmPassword"/>
+                        <span th:if="${#lists.contains(#fields.globalErrors(), 'user.confirm.password')}"
+                              th:text="Invalid password confirmation" class="text-danger fs-6">
+                        </span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="code" class="form-label float-start">Confirm code</label>
+                        <input name="code" class="form-control" id="code"/>
+                        <span th:if="${#lists.contains(#fields.globalErrors(), 'user.confirm.code')}"
+                              th:text="Invalid code" class="text-danger fs-6"></span>
+                    </div>
+                    <button class="btn btn-primary float-end">Submit</button>
+                </form>
+                <form th:unless="${to.contains('confirm')}" action="/account/forgot" method="post">
+                    <input name="email" type="text" inputmode="numeric" class="form-control">
+                    <button class="btn btn-primary float-end mt-3">Confirm</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script th:src="@{/bootstrap/js/bootstrap.min.js}"></script>
+    <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/bootstrap/js/jquery.min.js}"></script>
+</body>
+</html>

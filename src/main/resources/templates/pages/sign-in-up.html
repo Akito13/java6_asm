@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&display=swap"
+        rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}">
+  <link rel="stylesheet" th:href="@{/bootstrap/custom/sign-in-up.css}">
+  <title>Account login</title>
+</head>
+<body th:class="${active}">
+<div class="container">
+<!--  <%&#45;&#45;  <h3 style="text-align: center; color: #fff;">${msg }</h3>&#45;&#45;%>-->
+<!--  <%&#45;&#45;  <h3 style="text-align: center; color: #fff;">${unknownError }</h3>&#45;&#45;%>-->
+  <div class="dark-bg">
+    <div class="box sign-in">
+      <h2>Already have an Account?</h2>
+      <button class="signInBtn">Sign in</button>
+    </div>
+    <div class="box sign-up">
+      <h2>Don't have an Account?</h2>
+      <button class="signUpBtn">Sign up</button>
+    </div>
+  </div>
+  <div th:class="|frmBox ${active}|">
+    <div class="form signInForm">
+      <form action="/account/login/process" th:object="${user}" method="post">
+        <h3>Sign In</h3>
+        <p th:if="${msg != null}" class="text-success fw-semibold">[[${msg}]]</p>
+        <div class="input-container">
+          <input th:field="*{email}" type="email" placeholder="Email" name="email"/>
+          <span th:if="${#fields.hasErrors('email')}" class="input-error" th:errors="*{email}"></span>
+        </div>
+        <div class="input-container">
+          <input th:field="*{password}" type="password" placeholder="Password" name="password"/>
+          <span th:if="${#fields.hasErrors('password')}" class="input-error" th:errors="*{password}"></span>
+        </div>
+        <div class="input-container">
+          <input type="submit" value="Login">
+        </div>
+        <div>
+          <a th:href="@{/account/forgot}" class="forgot">Forgot Password?</a>
+          <a th:href="@{/}" class="home">Home</a>
+        </div>
+      </form>
+    </div>
+    <div class="form signUpForm">
+      <form th:action="@{|/account/signup/${step == 1 ? '1':'2'}|}" method="post" th:object="${signupUser}">
+        <h3 class="mb-2">Sign Up</h3>
+        <span th:if="signupError != null" class="fs-6 mb-2 d-block" style="color: #c71111;">[[${signupError}]]</span>
+        <th:block th:if="${step == 1}">
+          <div class="input-container">
+            <input th:field="*{email}" type="email" placeholder="Email Address" />
+            <span th:if="${#fields.hasErrors('email')}" class="input-error" th:errors="*{email}"></span>
+          </div>
+          <div class="input-container">
+            <input th:field="*{password}" type="password" placeholder="Password"/>
+            <span th:if="${#fields.hasErrors('password')}" class="input-error" th:errors="*{password}"></span>
+          </div>
+          <div class="input-container">
+            <input name="confirmPassword" type="password" placeholder="Confirm Password">
+            <span th:if="${#fields.hasGlobalErrors()}" th:text="${#fields.globalErrors().get(0)}" class="input-error"></span>
+          </div>
+        </th:block>
+        <th:block th:if="${step == 2}">
+          <div class="input-container">
+            <input type="text" placeholder="Username" th:field="*{tenKH}" />
+            <span th:if="${#fields.hasErrors('tenKH')}" class="input-error" th:errors="*{tenKH}"></span>
+          </div>
+          <div class="input-container">
+            <input type="text" placeholder="Address" th:field="*{diaChi}" />
+            <span th:if="${#fields.hasErrors('diaChi')}" class="input-error" th:errors="*{diaChi}"></span>
+          </div>
+          <div class="input-container">
+            <input type="text" placeholder="Phone Number" th:field="*{sdt}" />
+            <span th:if="${#fields.hasErrors('sdt')}" class="input-error" th:errors="*{sdt}"></span>
+          </div>
+          <div class="input-container d-none">
+            <input th:field="*{email}" type="email" placeholder="Email Address" />
+            <span th:if="${#fields.hasErrors('email')}" class="input-error" th:errors="*{email}"></span>
+          </div>
+          <div class="input-container d-none">
+            <input th:field="*{password}" type="text" placeholder="Password"/>
+            <span th:if="${#fields.hasErrors('password')}" class="input-error" th:errors="*{password}"></span>
+          </div>
+        </th:block>
+        <div class="input-container">
+          <input type="submit" value="Register">
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+  const signInBtn = document.querySelector('.signInBtn');
+  const signUpBtn = document.querySelector('.signUpBtn')
+  const frmBox = document.querySelector('.frmBox')
+  const body = document.querySelector('body')
+  signUpBtn.addEventListener('click', (e) => {
+    frmBox.classList.add('active')
+    body.classList.add('active')
+  })
+  signInBtn.addEventListener('click', e => {
+    frmBox.classList.remove('active')
+    body.classList.remove('active')
+  })
+</script>
+</body>
+</html>
